@@ -1,0 +1,27 @@
+{
+  "name": "bookreader-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A free, fully client-side ebook reader (EPUB/PDF) with theming and BYOK Gemini translation. No backend.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "epubjs": "^0.3.93",
+    "idb": "^8.0.0",
+    "jszip": "^3.10.1",
+    "pdfjs-dist": "^4.7.76",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "puppeteer-core": "^25.3.0",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}
