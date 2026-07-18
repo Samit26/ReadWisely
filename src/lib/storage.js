@@ -31,7 +31,7 @@ function write(key, value) {
 // ---- Settings -------------------------------------------------------------
 
 export const DEFAULT_SETTINGS = {
-  theme: 'dark', // light | dark | sepia | amoled
+  theme: 'sepia', // light | dark | sepia | amoled
   fontSize: 100, // percent (epub reflow)
   pdfZoom: 100, // percent (pdf page width/zoom, re-rendered)
   fontFamily: 'serif', // serif | sans | dyslexic | mono

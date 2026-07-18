@@ -341,3 +341,36 @@
 .home-conversion-tip { display:flex; align-items:flex-start; gap:11px; max-width:690px; margin:-22px 0 38px; padding:12px 14px; border:1px solid #e3d8c7; border-radius:10px; background:#fffaf1; color:#6e6255; }.home-conversion-tip > span { display:grid; place-items:center; flex:0 0 auto; width:29px; height:29px; border-radius:8px; color:#936a49; background:#f0e3d1; }.home-conversion-tip strong { display:block; margin:1px 0 3px; color:#5e5041; font-size:12px; }.home-conversion-tip p { margin:0; font-size:12px; line-height:1.45; }@media(max-width:720px){.home-conversion-tip{margin:-8px 0 28px}}
 
 .modal--pdf-choice { max-width: 530px; }.pdf-choice { display:flex; align-items:flex-start; gap:15px; }.pdf-choice__icon { display:grid; place-items:center; flex:0 0 auto; width:43px; height:43px; border-radius:12px; color:#8b674a; background:#f1e4d3; }.pdf-choice__lead { margin:0 0 8px; color:var(--text); font-size:15px; font-weight:650; line-height:1.45; }.pdf-choice p:not(.pdf-choice__lead) { margin:0; color:var(--text-dim); font-size:13px; line-height:1.55; }.pdf-choice__link { display:inline-flex; align-items:center; gap:6px; margin-top:15px; color:#815b3e; font-size:13px; font-weight:700; }.pdf-choice__link b { font-size:16px; }
+/* Home palette: inherit the active reader theme instead of retaining the light-only paper palette. */
+.home {
+  --ink: var(--text);
+  --muted: var(--text-dim);
+  --line: var(--border);
+  --paper: var(--bg-elevated);
+  --home-accent: var(--accent);
+  --home-accent-muted: color-mix(in srgb, var(--accent) 72%, var(--text-dim));
+  --home-accent-soft: color-mix(in srgb, var(--accent) 13%, var(--bg-sunken));
+  --home-progress-track: color-mix(in srgb, var(--border-strong) 72%, var(--bg-sunken));
+}
+.home-brand span { color: var(--accent-contrast); background: var(--accent); }
+.home-add { color: var(--accent-contrast); background: var(--accent); }
+.home-add:hover { background: color-mix(in srgb, var(--accent) 82%, #000); }
+.home-kicker, .section-tag { color: var(--home-accent-muted); }
+.home-intro h1 em, .focus-book__arrow, .focus-empty b, .home-drop, .home-drop button { color: var(--home-accent); }
+.home-intro__note { border-left-color: var(--border-strong); }
+.home-intro__note-mark { color: var(--home-accent-muted); }
+.home-intro__note p { color: var(--text-dim); }
+.focus-book, .focus-empty { border-color: var(--border); background: var(--paper); }
+.focus-book:hover, .focus-empty:hover { box-shadow: var(--shadow-1); }
+.focus-book__cover { background: var(--home-accent-muted); box-shadow: 4px 6px 12px rgba(0,0,0,.18); }
+.focus-book__progress, .home-meter__row i { background: var(--home-progress-track); }
+.focus-book__progress i, .home-meter__row i::before { background: var(--home-accent); }
+.focus-book small, .home-shelves span { color: var(--text-faint); }
+.focus-empty__icon { color: var(--home-accent); background: var(--home-accent-soft); }
+.home-meter { border-color: var(--border); background: var(--bg-sunken); }
+.home-search { border-bottom-color: var(--border-strong); color: var(--text-faint); }
+.home-shelves button.active { border-bottom-color: var(--home-accent); }
+.home-drop { border-color: var(--border-strong); }
+.home-drop button { border-bottom-color: var(--home-accent); }
+.home-import { background: rgba(0,0,0,.42); }
+.home-import > div { background: var(--bg-elevated); box-shadow: var(--shadow-2); }
