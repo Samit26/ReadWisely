@@ -3,7 +3,7 @@ import { Icon } from '../common/Icon.jsx'
 // Top bar: back, title, progress %, and access to panels + typography.
 export default function ReaderToolbar({
   book, progress, visible, onExit, onPanel, activePanel,
-  onTypography, typographyOpen, onBookmark
+  onTypography, typographyOpen, onBookmark, onRecap
 }) {
   return (
     <header className={`reader-toolbar ${visible ? '' : 'reader-toolbar--hidden'}`}>
@@ -18,6 +18,9 @@ export default function ReaderToolbar({
       </div>
 
       <div className="reader-toolbar__right">
+        <button className="icon-btn" onClick={onRecap} aria-label="Recap where I left off" title="Recap where I left off">
+          <Icon.Recap />
+        </button>
         <button className={`icon-btn ${activePanel === 'search' ? 'active' : ''}`} onClick={() => onPanel('search')} aria-label="Search" title="Search (Ctrl+F)">
           <Icon.Search />
         </button>

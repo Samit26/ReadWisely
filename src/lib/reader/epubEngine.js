@@ -169,6 +169,38 @@ export class EpubEngine extends Emitter {
   getToc() { return this._toc }
   getPageInfo() { return this._pageInfo || null }
 
+  // Text the reader has passed through, up to their current spot. scope='recent'
+  // returns the current spine section + the previous one (tail-trimmed to maxChars);
+  // scope='all' returns every section from the start up to and including the current
+  // one (trimmed to maxChars, keeping the most recent text). Used for the AI recap.
+  async getReadText({ maxChars = 15000, scope = 'recent' } = {}) {
+    if (!this.book || !this._location) return ''
+    const items = this.book.spine?.spineItems || []
+    if (!items.length) return ''
+    let idx = 0
+    try {
+      const section = this.book.spine.get(this._location)
+      if (section && typeof section.index === 'number') idx = section.index
+    } catch { /* fall back to 0 */ }
+
+    const wanted = scope === 'all'
+      ? Array.from({ length: idx + 1 }, (_, i) => i) // start → current section
+      : [idx - 1, idx].filter((i) => i >= 0)
+    const parts = []
+    for (const i of wanted) {
+      const item = items[i]
+      if (!item) continue
+      try {
+        await item.load(this.book.load.bind(this.book))
+        const text = item.document?.body?.textContent || ''
+        if (text.trim()) parts.push(text.replace(/\s+/g, ' ').trim())
+        item.unload()
+      } catch { /* skip unreadable section */ }
+    }
+    const joined = parts.join('\n\n')
+    return joined.length > maxChars ? joined.slice(-maxChars) : joined
+  }
+
   async search(query) {
     if (!query || !this.book) return []
     const results = []

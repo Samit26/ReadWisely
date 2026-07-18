@@ -22,5 +22,7 @@ export const Icon = {
   Note: (x) => <svg {...p} {...x}><path d="M4 4h16v12l-4 4H4z" /><path d="M16 20v-4h4" /></svg>,
   Sun: (x) => <svg {...p} {...x}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" /></svg>,
   Dots: (x) => <svg {...p} {...x}><circle cx="12" cy="5" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="12" cy="19" r="1.4" /></svg>,
-  Copy: (x) => <svg {...p} {...x}><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>
+  Copy: (x) => <svg {...p} {...x}><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>,
+  Candle: (x) => <svg {...p} {...x}><path d="M12 2c1.6 1.7 2.4 3.2 2.4 4.5A2.4 2.4 0 0 1 12 9a2.4 2.4 0 0 1-2.4-2.5C9.6 5.2 10.4 3.7 12 2z" /><path d="M8 11h8v9a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1z" /><path d="M12 11V9" /></svg>,
+  Recap: (x) => <svg {...p} {...x}><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /><path d="M12 8v4l3 2" /></svg>
 }

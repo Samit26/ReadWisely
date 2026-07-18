@@ -7,10 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.png', 'logo.png'],
       manifest: {
-        name: 'BookReader Web',
-        short_name: 'BookReader',
+        name: 'readwisely',
+        short_name: 'readwisely',
         description: 'A free, client-side EPUB/PDF reader with themes and BYOK translation.',
         theme_color: '#0f1115',
         background_color: '#0f1115',

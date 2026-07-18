@@ -5,6 +5,8 @@ import BookCard from './BookCard.jsx'
 import UploadZone from './UploadZone.jsx'
 import SettingsModal from '../Settings/SettingsModal.jsx'
 import BackupBar from './BackupBar.jsx'
+import StreakChip from './StreakChip.jsx'
+import StatsSection from './StatsSection.jsx'
 import Modal from '../common/Modal.jsx'
 
 export default function LibraryView({ onOpenBook }) {
@@ -29,9 +31,8 @@ export default function LibraryView({ onOpenBook }) {
 
   return <main className="home">
     <header className="home-nav">
-      <button className="home-brand" onClick={() => { setShelf('all'); setQuery('') }}><span><Icon.Book width={19} height={19} /></span>readwisely</button>
-      <div className="home-nav__status"><i />Saved locally</div>
-      <div className="home-nav__actions"><button className="home-add" disabled={importing} onClick={openPicker}>{importing ? <span className="btn-spinner" /> : <Icon.Plus width={17} height={17} />}{importing ? 'Adding book' : 'Add book'}</button><button className="icon-btn" onClick={() => setShowSettings(true)} aria-label="Settings"><Icon.Settings /></button></div>
+      <button className="home-brand" onClick={() => { setShelf('all'); setQuery('') }}><img className="home-brand__logo" src="/logo.png" alt="" width={31} height={31} />readwisely</button>
+      <div className="home-nav__actions"><StreakChip /><button className="icon-btn" onClick={() => setShowSettings(true)} aria-label="Settings"><Icon.Settings /></button></div>
       <input ref={picker} type="file" hidden multiple accept=".epub,.pdf,application/epub+zip,application/pdf" onChange={(e) => { add(e.target.files); e.target.value = '' }} />
     </header>
 
@@ -46,9 +47,10 @@ export default function LibraryView({ onOpenBook }) {
     <section className="home-library"><div className="home-library__head"><div><span className="section-tag">Collection</span><h2>Your books</h2></div><label className="home-search"><Icon.Search width={16} height={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search title or author" /></label></div><div className="home-shelves"><button className={shelf === 'all' ? 'active' : ''} onClick={() => setShelf('all')}>All <span>{counts.all}</span></button>{SHELVES.map((item) => <button key={item.id} className={shelf === item.id ? 'active' : ''} onClick={() => setShelf(item.id)}>{item.label} <span>{counts[item.id]}</span></button>)}</div>
       {loading ? <div className="home-loading"><div className="spinner" /><span>Opening your library</span></div> : books.length ? <UploadZone onFiles={add} compact>{visible.length ? <div className="book-grid">{visible.map((book, index) => <BookCard key={book.id} book={book} index={index} onOpen={() => onOpenBook(book.id)} />)}<button className="book-add-card" onClick={openPicker}><span><Icon.Plus width={25} height={25} /></span><strong>Add a book</strong><small>EPUB or PDF</small></button></div> : <div className="home-no-results">No matching books.</div>}</UploadZone> : <UploadZone onFiles={add}><div className="home-drop"><Icon.Book width={28} height={28} /><h3>Nothing on the shelf yet</h3><p>Drop your first EPUB or PDF here, or select it from your device.</p><button onClick={openPicker}>Select a book</button></div></UploadZone>}
     </section>
+    <StatsSection books={books} />
     <BackupBar />
     {importing && <div className="home-import" role="status"><div><div className="spinner" /><strong>Converting your book</strong><p>Extracting text and preparing a readable EPUB. Scanned PDFs may take a few minutes.</p></div></div>}
-    {pendingFiles && <Modal title="PDF import options" onClose={() => setPendingFiles(null)} className="modal--pdf-choice" footer={<><button className="btn" onClick={() => setPendingFiles(null)}>Cancel</button><button className="btn btn--primary" onClick={() => { const files = pendingFiles; setPendingFiles(null); importFiles(files) }}>Proceed anyway</button></>}><div className="pdf-choice"><span className="pdf-choice__icon"><Icon.Book width={23} height={23} /></span><div><p className="pdf-choice__lead">For the best reading experience, convert your PDF to EPUB first.</p><p>Online converters often preserve scanned-book text and paragraph flow better. After conversion, add the EPUB here; you can fix its title and cover from Book options.</p><a className="pdf-choice__link" href="https://www.freeconvert.com/pdf-to-epub" target="_blank" rel="noreferrer">Open FreeConvert PDF to EPUB <b>↗</b></a></div></div></Modal>}
+    {pendingFiles && <Modal title="PDF import options" onClose={() => setPendingFiles(null)} className="modal--pdf-choice" footer={<><button className="btn" onClick={() => setPendingFiles(null)}>Cancel</button><button className="btn btn--primary" onClick={() => { const files = pendingFiles; setPendingFiles(null); importFiles(files) }}>Proceed anyway</button></>}><div className="pdf-choice"><span className="pdf-choice__icon"><img className="pdf-choice__logo" src="/logo.png" alt="" width={26} height={26} /></span><div><p className="pdf-choice__lead">For the best reading experience, convert your PDF to EPUB first.</p><p>Online converters often preserve scanned-book text and paragraph flow better. After conversion, add the EPUB here; you can fix its title and cover from Book options.</p><a className="pdf-choice__link" href="https://www.freeconvert.com/pdf-to-epub" target="_blank" rel="noreferrer">Open FreeConvert PDF to EPUB <b>↗</b></a></div></div></Modal>}
     {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
   </main>
 }

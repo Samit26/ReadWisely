@@ -235,6 +235,26 @@ export class PdfEngine extends Emitter {
   getToc() { return this._toc }
   getPageInfo() { return this._pageInfo || { current: this._current, total: this._numPages, kind: 'page' } }
 
+  // Text from the pages up to the current page, tail-trimmed to ~maxChars.
+  // The backward walk naturally covers scope='recent' (small cap) and scope='all'
+  // (large cap → walks to page 1). Used for the AI recap.
+  async getReadText({ maxChars = 15000 } = {}) {
+    if (!this.pdf) return ''
+    const current = this._current || 1
+    const parts = []
+    // Walk backwards from the current page, collecting text until we have enough.
+    for (let n = current; n >= 1 && parts.join(' ').length < maxChars; n--) {
+      try {
+        const page = await this.pdf.getPage(n)
+        const content = await page.getTextContent()
+        const text = content.items.map((i) => i.str).join(' ').replace(/\s+/g, ' ').trim()
+        if (text) parts.unshift(text)
+      } catch { /* skip unreadable page */ }
+    }
+    const joined = parts.join('\n\n')
+    return joined.length > maxChars ? joined.slice(-maxChars) : joined
+  }
+
   async search(query) {
     if (!query || !this.pdf) return []
     const results = []

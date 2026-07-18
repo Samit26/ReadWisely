@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Modal from '../common/Modal.jsx'
 import { useToast } from '../../context/ToastContext.jsx'
+import { useSettings } from '../../context/SettingsContext.jsx'
 import {
   getGeminiKey, setGeminiKey, getGeminiModel, setGeminiModel,
   getTargetLang, setTargetLang, getSecondLang, setSecondLang
@@ -15,11 +16,19 @@ const MODELS = [
   { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (older)' }
 ]
 
+const THEMES = [
+  { id: 'light', label: 'Light', bg: '#faf9f7', fg: '#1a1a1a' },
+  { id: 'sepia', label: 'Sepia', bg: '#f4ecd8', fg: '#4a3b2a' },
+  { id: 'dark', label: 'Dark', bg: '#15171c', fg: '#d7d9de' },
+  { id: 'amoled', label: 'Night', bg: '#000000', fg: '#c7c9ce' }
+]
+
 const LANGS = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Hindi', 'Urdu', 'Bengali', 'Tamil', 'Telugu', 'Marathi', 'Arabic', 'Chinese (Simplified)', 'Japanese', 'Korean', 'Russian', 'Turkish', 'Indonesian', 'Vietnamese']
 
 // Settings modal. Focus of the brief: BYOK Gemini onboarding with a clear "why".
 export default function SettingsModal({ onClose, initialTab = 'translate' }) {
   const toast = useToast()
+  const { settings, update } = useSettings()
   const [key, setKey] = useState(getGeminiKey())
   const [model, setModel] = useState(getGeminiModel())
   const [lang, setLang] = useState(getTargetLang())
@@ -56,6 +65,25 @@ export default function SettingsModal({ onClose, initialTab = 'translate' }) {
         </>
       }
     >
+      <section className="settings-section">
+        <h3 className="settings-h"><Icon.Sun width={18} height={18} /> Appearance</h3>
+        <p className="field__hint muted" style={{ marginTop: 0 }}>Choose a theme for the whole app. Applies instantly.</p>
+        <div className="settings-themes">
+          {THEMES.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`theme-swatch ${settings.theme === t.id ? 'active' : ''}`}
+              style={{ background: t.bg, color: t.fg }}
+              onClick={() => update({ theme: t.id })}
+              aria-pressed={settings.theme === t.id}
+            >
+              Aa<span>{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="settings-section">
         <h3 className="settings-h"><Icon.Translate width={18} height={18} /> Gemini translation (BYOK)</h3>
         <div className="byok-note">

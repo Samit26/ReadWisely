@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { createEngine } from '../../lib/reader/readerEngine.js'
 import { getBook, getBlob, highlights as hlStore, bookmarks as bmStore } from '../../lib/db.js'
-import { loadPosition, savePosition } from '../../lib/storage.js'
+import { loadPosition, savePosition, recordReadingSeconds } from '../../lib/storage.js'
 import { useSettings } from '../../context/SettingsContext.jsx'
 import { useLibrary } from '../../context/LibraryContext.jsx'
 import { useToast } from '../../context/ToastContext.jsx'
@@ -11,6 +11,7 @@ import ReaderSidebar from './ReaderSidebar.jsx'
 import TypographyPanel from './TypographyPanel.jsx'
 import SelectionMenu from './SelectionMenu.jsx'
 import TranslatePopover from './TranslatePopover.jsx'
+import RecapPopover from './RecapPopover.jsx'
 import ReaderError from './ReaderError.jsx'
 import '../../styles/reader.css'
 
@@ -42,7 +43,21 @@ export default function ReaderView({ bookId, onExit }) {
   const [bookmarks, setBookmarks] = useState([])
   const [selection, setSelection] = useState(null) // { text, location, rect }
   const [translate, setTranslate] = useState(null) // { text, rect }
+  const [showRecap, setShowRecap] = useState(false)
   const selectionRef = useRef(null)
+
+  // Active-reading time accumulator for the streak. Purely event-driven: each
+  // reader activity (page turn, tap) adds the gap since the last activity,
+  // capped so idle-with-book-open doesn't inflate the count.
+  const lastActiveRef = useRef(0)
+  const markActivity = useCallback(() => {
+    const now = Date.now()
+    const last = lastActiveRef.current
+    lastActiveRef.current = now
+    if (!last) return
+    const elapsed = Math.min((now - last) / 1000, 30) // cap idle gaps at 30s
+    if (elapsed > 0) recordReadingSeconds(elapsed)
+  }, [])
   selectionRef.current = selection || translate
 
   // ---- Load book + engine ------------------------------------------------
@@ -77,6 +92,7 @@ export default function ReaderView({ bookId, onExit }) {
 
         engine.on('error', (e) => { engineErrored = true; setError(e); setStatus('error') })
         engine.on('relocated', ({ location, progress, pageInfo }) => {
+          markActivity()
           setLocation(location)
           setProgress(progress)
           if (pageInfo) setPageInfo(pageInfo)
@@ -86,7 +102,7 @@ export default function ReaderView({ bookId, onExit }) {
         engine.on('selected', (sel) => setSelection(sel))
         engine.on('highlight-click', (hl) => openHighlight(hl))
         // Events from inside the epub iframe (which never bubble to our window).
-        engine.on('tap', () => { setShowType(false); if (!selectionRef.current) setChromeVisible((v) => !v) })
+        engine.on('tap', () => { markActivity(); setShowType(false); if (!selectionRef.current) setChromeVisible((v) => !v) })
         engine.on('keydown', ({ key }) => {
           if (key === 'ArrowRight') engine.next()
           else if (key === 'ArrowLeft') engine.prev()
@@ -233,6 +249,7 @@ export default function ReaderView({ bookId, onExit }) {
         typographyOpen={showType}
         onBookmark={toggleBookmark}
         isBookmarked={false}
+        onRecap={() => setShowRecap(true)}
       />
 
       <div className="reader-stage">
@@ -304,6 +321,13 @@ export default function ReaderView({ bookId, onExit }) {
           text={translate.text}
           rect={translate.rect}
           onClose={() => setTranslate(null)}
+        />
+      )}
+
+      {showRecap && (
+        <RecapPopover
+          engine={engineRef.current}
+          onClose={() => setShowRecap(false)}
         />
       )}
     </div>

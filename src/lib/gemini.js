@@ -132,8 +132,54 @@ export async function translateText(text, opts = {}) {
   return { ...parsed, targetLang, secondLang }
 }
 
-// ---- Author lookup ---------------------------------------------------------
+// ---- Reading recap ---------------------------------------------------------
 
+const RECAP_SCHEMA = {
+  type: 'object',
+  properties: {
+    recap: { type: 'string' },
+    lastBeat: { type: 'string' }
+  },
+  required: ['recap']
+}
+
+// Spoiler-safe recap of the text the reader has already passed through. `text`
+// ends exactly where the reader stopped. scope='recent' recaps just the given
+// passage; scope='all' recaps the whole story so far. We always instruct the
+// model to summarize ONLY the supplied text and never speculate about what's ahead.
+export async function recapReading(text, opts = {}) {
+  const lang = opts.targetLang || getTargetLang()
+  const all = opts.scope === 'all'
+  const recapSentences = all ? '4–7 short sentences' : '2–4 short sentences'
+  const passageLabel = all
+    ? `Below is EVERYTHING the reader has read so far, from the start up to where they stopped.`
+    : `Below is the passage the reader has MOST RECENTLY read (it ends exactly where they stopped).`
+  const recapAsk = all
+    ? `Write a warm, spoiler-safe recap in ${lang} of the story so far — the main arc up to this point.`
+    : `Write a warm, spoiler-safe recap in ${lang} of what happened in THIS passage only.`
+
+  const prompt =
+    `You are a reading companion helping someone pick a book back up.\n` +
+    `${passageLabel}\n` +
+    `${recapAsk}\n` +
+    `Rules:\n` +
+    `- Summarize ONLY the text given. Never invent or predict what comes next.\n` +
+    `- ${recapSentences} for "recap": the key events/ideas, so they remember where they are.\n` +
+    `- "lastBeat": one sentence describing the very last thing happening as the text ends.\n` +
+    `- Keep a calm, literary tone. No headings, no bullet points.\n\n` +
+    `Text:\n"""${text}"""\n\n` +
+    `Respond as JSON only.`
+
+  const raw = await generateJson(prompt, RECAP_SCHEMA, { ...opts, temperature: 0.3 })
+  try {
+    const parsed = JSON.parse(raw)
+    return { recap: parsed.recap || '', lastBeat: parsed.lastBeat || '' }
+  } catch {
+    return { recap: raw.trim(), lastBeat: '' }
+  }
+}
+
+// ---- Author lookup ---------------------------------------------------------
 const AUTHOR_SCHEMA = {
   type: 'object',
   properties: {
