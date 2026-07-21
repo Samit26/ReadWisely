@@ -45,6 +45,8 @@ export default function ReaderView({ bookId, onExit }) {
   const [translate, setTranslate] = useState(null) // { text, rect }
   const [showRecap, setShowRecap] = useState(false)
   const selectionRef = useRef(null)
+  const lastScrollPositionRef = useRef(0)
+  const scrollFrameRef = useRef(null)
 
   // Active-reading time accumulator for the streak. Purely event-driven: each
   // reader activity (page turn, tap) adds the gap since the last activity,
@@ -101,6 +103,9 @@ export default function ReaderView({ bookId, onExit }) {
         engine.on('loaded', ({ toc }) => { setToc(toc || []); setStatus('ready') })
         engine.on('selected', (sel) => setSelection(sel))
         engine.on('highlight-click', (hl) => openHighlight(hl))
+        // Engines report their actual reading scroller, so the toolbar can react
+        // without adding a second scrolling layer around the book.
+        engine.on('scroll', ({ top = 0 }) => handleReadingScroll(top))
         // Events from inside the epub iframe (which never bubble to our window).
         engine.on('tap', () => { markActivity(); setShowType(false); if (!selectionRef.current) setChromeVisible((v) => !v) })
         engine.on('keydown', ({ key }) => {
@@ -137,6 +142,23 @@ export default function ReaderView({ bookId, onExit }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId, epubFlow])
+
+  // Hide controls while moving forward; reveal them on a deliberate upward
+  // scroll. rAF coalescing and a small threshold prevent scroll jitter.
+  const handleReadingScroll = useCallback((top) => {
+    if (scrollFrameRef.current) cancelAnimationFrame(scrollFrameRef.current)
+    scrollFrameRef.current = requestAnimationFrame(() => {
+      const delta = top - lastScrollPositionRef.current
+      lastScrollPositionRef.current = top
+      if (Math.abs(delta) < 6 || selectionRef.current) return
+      if (delta > 0) setChromeVisible(false)
+      else setChromeVisible(true)
+    })
+  }, [])
+
+  useEffect(() => () => {
+    if (scrollFrameRef.current) cancelAnimationFrame(scrollFrameRef.current)
+  }, [])
 
   // Persist reading position (debounced) + library progress (shelf is derived
   // from progress inside updateBook).
@@ -272,8 +294,7 @@ export default function ReaderView({ bookId, onExit }) {
         )}
       </div>
 
-      {chromeVisible && (
-        <div className="reader-footer">
+      <div className={`reader-footer ${chromeVisible ? '' : 'reader-footer--hidden'}`} aria-hidden={!chromeVisible}>
           {pageInfo && (
             <span className="reader-pageinfo">
               {pageInfo.kind === 'page' ? 'Page' : 'Loc'} {pageInfo.current} of {pageInfo.total}
@@ -283,8 +304,7 @@ export default function ReaderView({ bookId, onExit }) {
             <div className="reader-progress-bar__fill" style={{ width: `${progress * 100}%` }} />
           </div>
           <span className="reader-pageinfo reader-pageinfo--pct">{Math.round(progress * 100)}%</span>
-        </div>
-      )}
+      </div>
 
       {showType && <TypographyPanel onClose={() => setShowType(false)} format={book?.format} />}
 

@@ -60,7 +60,10 @@ export class PdfEngine extends Emitter {
     this._pages.forEach((p) => this._observer.observe(p.el))
 
     // Track which page is centered for location + progress.
-    this._onScroll = () => this._updateCurrentPage()
+    this._onScroll = () => {
+      this._updateCurrentPage()
+      this.emit('scroll', { top: scroller.scrollTop })
+    }
     scroller.addEventListener('scroll', this._onScroll, { passive: true })
 
     // Keep text-layer scale in sync when the page boxes change size

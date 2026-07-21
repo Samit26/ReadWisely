@@ -14,6 +14,7 @@ export class EpubEngine extends Emitter {
     this._toc = []
     this._destroyed = false
     this._highlightHandlers = new Map() // id -> cfiRange for removal
+    this._scrollTargets = []
   }
 
   async init(container, { startLocation, settings } = {}) {
@@ -66,6 +67,7 @@ export class EpubEngine extends Emitter {
       await this.book.ready
       this._toc = this._flattenToc(this.book.navigation?.toc || [])
       await this.rendition.display(startLocation || undefined)
+      this._observeReadingScroll()
       this.emit('loaded', { toc: this._toc })
     } catch (err) {
       this.emit('error', this._friendlyError(err))
@@ -91,7 +93,22 @@ export class EpubEngine extends Emitter {
     // Re-inject our reader stylesheet into every chapter iframe as it renders.
     this.rendition.hooks.content.register((contents) => {
       this._injectStyles(contents)
+      // Fallback for EPUBs that scroll inside their chapter document.
+      this._observeScrollTarget(contents.window, () => contents.window.scrollY)
     })
+  }
+
+  _observeReadingScroll() {
+    const managerScroller = this.rendition?.manager?.container
+      || this.container?.querySelector?.('.epub-container')
+    this._observeScrollTarget(managerScroller, () => managerScroller?.scrollTop || 0)
+  }
+
+  _observeScrollTarget(target, getTop) {
+    if (!target || this._scrollTargets.some((item) => item.target === target)) return
+    const onScroll = () => this.emit('scroll', { top: getTop() })
+    target.addEventListener('scroll', onScroll, { passive: true })
+    this._scrollTargets.push({ target, onScroll })
   }
 
   applySettings(settings) {
@@ -123,8 +140,16 @@ export class EpubEngine extends Emitter {
         font-size: ${s.fontSize}% !important;
       }
       html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
         background: ${palette.bg} !important;
         color: ${palette.text} !important;
+      }
+      /* EPUBs commonly ship with 5–10% body margins. Replace those with a
+         single predictable mobile gutter, so reading width is never reduced twice. */
+      @media (max-width: 640px) {
+        body { padding-inline: 8px !important; }
       }
       ${textSelector} {
         color: ${palette.text} !important;
@@ -146,7 +171,11 @@ export class EpubEngine extends Emitter {
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: ${palette.text}55; border-radius: 10px; border: 4px solid ${palette.bg}; min-height: 48px; }
       ::-webkit-scrollbar-thumb:hover { background: ${palette.text}88; }
-      html { scrollbar-width: thin; scrollbar-color: ${palette.text}55 transparent; }`
+      html { scrollbar-width: thin; scrollbar-color: ${palette.text}55 transparent; }
+      @media (max-width: 640px) {
+        ::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        html { scrollbar-width: none !important; }
+      }`
         : `/* Hide any scrollbars inside the chapter iframe (pagination clips columns). */
       ::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }`}
     `
@@ -247,6 +276,8 @@ export class EpubEngine extends Emitter {
 
   destroy() {
     this._destroyed = true
+    this._scrollTargets.forEach(({ target, onScroll }) => target.removeEventListener('scroll', onScroll))
+    this._scrollTargets = []
     try { this.rendition?.destroy() } catch { /* noop */ }
     try { this.book?.destroy() } catch { /* noop */ }
   }
