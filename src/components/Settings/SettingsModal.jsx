@@ -8,12 +8,11 @@ import {
 } from '../../lib/storage.js'
 import { validateKey } from '../../lib/gemini.js'
 import { Icon } from '../common/Icon.jsx'
+import SyncSettings from './SyncSettings.jsx'
 
 const MODELS = [
   { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash (fast, recommended)' },
-  { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash-Lite (fastest, cheapest)' },
-  { id: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro (highest quality)' },
-  { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (older)' }
+  { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash-Lite (fastest, cheapest)' }
 ]
 
 const THEMES = [
@@ -148,6 +147,11 @@ export default function SettingsModal({ onClose, initialTab = 'translate' }) {
             </button>
           )}
         </div>
+      </section>
+
+      <section className="settings-section">
+        <h3 className="settings-h"><Icon.Upload width={18} height={18} /> Cloud Sync</h3>
+        <SyncSettings />
       </section>
     </Modal>
   )

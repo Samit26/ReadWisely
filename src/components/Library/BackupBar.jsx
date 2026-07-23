@@ -51,7 +51,7 @@ export default function BackupBar() {
     <footer className="backup-bar">
       <div className="backup-bar__info muted">
         <Icon.Download width={16} height={16} />
-        No cloud sync by design. Back up or move your library manually.
+        Cloud sync available in Settings. Export/import moves your full library.
       </div>
       <div className="backup-bar__actions">
         <button className="btn btn--sm" onClick={doExport} disabled={busy}>

@@ -2,8 +2,7 @@
 
 // crypto.randomUUID is available in all modern browsers over https/localhost.
 export function uid() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
-  return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36)
+  return crypto.randomUUID()
 }
 
 export function formatBytes(bytes) {
@@ -19,20 +18,16 @@ export function clamp(n, lo, hi) {
 
 export function debounce(fn, ms) {
   let t
-  return (...args) => {
+  const debounced = (...args) => {
     clearTimeout(t)
     t = setTimeout(() => fn(...args), ms)
   }
+  debounced.cancel = () => clearTimeout(t)
+  return debounced
 }
 
-// Read a File/Blob into an ArrayBuffer.
 export function fileToArrayBuffer(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = () => reject(reader.error)
-    reader.readAsArrayBuffer(file)
-  })
+  return file.arrayBuffer()
 }
 
 export function detectFormat(file) {

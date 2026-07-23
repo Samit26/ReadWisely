@@ -6,6 +6,7 @@ import { guessAuthor, hasGeminiKey, GeminiError } from '../lib/gemini.js'
 import { clearPosition } from '../lib/storage.js'
 import { fileToArrayBuffer, detectFormat, uid } from '../lib/util.js'
 import { useToast } from './ToastContext.jsx'
+import { trackDeletion } from '../lib/sync.js'
 
 const LibraryContext = createContext(null)
 
@@ -42,6 +43,9 @@ export function LibraryProvider({ children }) {
 
   useEffect(() => {
     refresh().finally(() => setLoading(false))
+    const onSyncRestored = () => { refresh() }
+    window.addEventListener('br-sync-restored', onSyncRestored)
+    return () => window.removeEventListener('br-sync-restored', onSyncRestored)
   }, [refresh])
 
   const updateBook = useCallback(async (id, patch) => {
@@ -171,6 +175,7 @@ export function LibraryProvider({ children }) {
   const removeBook = useCallback(async (id) => {
     try {
       await deleteBook(id)
+      trackDeletion(id)
       clearPosition(id)
       setBooks((prev) => prev.filter((b) => b.id !== id))
       setStorage(await getStorageEstimate())

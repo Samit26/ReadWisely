@@ -62,6 +62,15 @@ export default function ReaderView({ bookId, onExit }) {
   }, [])
   selectionRef.current = selection || translate
 
+  // Persist reading position (debounced) + library progress.
+  const persist = useCallback(
+    debounce((location, progress) => {
+      savePosition(bookId, { location, progress, at: Date.now() })
+      updateBook(bookId, { progress })
+    }, 500),
+    [bookId, updateBook]
+  )
+
   // ---- Load book + engine ------------------------------------------------
   // Re-runs when the EPUB flow (paginated/scrolled) toggles: the flow is fixed
   // at engine init, so a rebuild is required. Position is saved on teardown.
@@ -131,12 +140,19 @@ export default function ReaderView({ bookId, onExit }) {
     boot()
     return () => {
       cancelled = true
+      persist.cancel()
+      
       // Save the exact position before teardown — the debounced persist may
       // not have fired yet, and the rebuilt engine resumes from loadPosition.
       try {
         const loc = engine?.getLocation?.()
-        if (loc) savePosition(bookId, { location: loc, progress: engine.getProgress?.() || 0, at: Date.now() })
+        const prog = engine?.getProgress?.() || 0
+        if (loc) {
+          savePosition(bookId, { location: loc, progress: prog, at: Date.now() })
+          updateBook(bookId, { progress: prog })
+        }
       } catch { /* engine may be mid-teardown */ }
+      
       engine?.destroy()
       engineRef.current = null
     }
@@ -156,19 +172,11 @@ export default function ReaderView({ bookId, onExit }) {
     })
   }, [])
 
-  useEffect(() => () => {
-    if (scrollFrameRef.current) cancelAnimationFrame(scrollFrameRef.current)
+  useEffect(() => {
+    return () => {
+      if (scrollFrameRef.current) cancelAnimationFrame(scrollFrameRef.current)
+    }
   }, [])
-
-  // Persist reading position (debounced) + library progress (shelf is derived
-  // from progress inside updateBook).
-  const persist = useCallback(
-    debounce((location, progress) => {
-      savePosition(bookId, { location, progress, at: Date.now() })
-      updateBook(bookId, { progress })
-    }, 500),
-    [bookId]
-  )
 
   // Live-apply typography/theme changes to the engine.
   useEffect(() => {

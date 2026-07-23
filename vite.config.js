@@ -32,6 +32,11 @@ export default defineConfig({
             // Never cache Gemini calls — always hit the network.
             urlPattern: /^https:\/\/generativelanguage\.googleapis\.com\/.*/i,
             handler: 'NetworkOnly'
+          },
+          {
+            // Never cache Google OAuth / Drive API calls.
+            urlPattern: /^https:\/\/(accounts\.google\.com|www\.googleapis\.com\/drive)\/.*/i,
+            handler: 'NetworkOnly'
           }
         ]
       },

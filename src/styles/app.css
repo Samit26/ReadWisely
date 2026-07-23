@@ -217,8 +217,40 @@
 .storage-warning .icon-btn { width: 28px; height: 28px; grid-row: 1; grid-column: 2; }
 
 /* ---- Settings modal ------------------------------------------------------ */
-.settings-section { display: flex; flex-direction: column; gap: 14px; }
-.settings-h { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; }
+.settings-section {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 16px 18px; border-radius: var(--radius);
+  background: var(--bg-sunken); border: 1px solid var(--border);
+  transition: border-color var(--transition), box-shadow 250ms ease;
+}
+.settings-section:hover {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+.settings-h {
+  display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.settings-section + .settings-section { margin-top: 16px; }
+.settings-section:last-child { border-bottom: none; padding-bottom: 0; }
+
+/* ---- Cloud Sync ---------------------------------------------------------- */
+.sync-note { background: var(--bg-sunken); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.sync-note p { margin: 0 0 8px; font-size: 13px; line-height: 1.6; }
+.sync-note p:last-child { margin-bottom: 0; }
+.sync-note code { font-size: 12px; padding: 1px 5px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.sync-status {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  background: color-mix(in srgb, #2ecc71 10%, var(--bg-sunken));
+  border: 1px solid color-mix(in srgb, #2ecc71 25%, var(--border));
+  font-size: 13px; font-weight: 600;
+}
+.sync-status__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #2ecc71; flex-shrink: 0;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #2ecc71 25%, transparent);
+}
+.sync-status .btn { margin-left: auto; }
 .settings-themes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .settings-themes .theme-swatch {
   display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 12px 4px 8px;

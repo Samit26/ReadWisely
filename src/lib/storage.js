@@ -94,7 +94,7 @@ export function getGeminiModel() {
   return LEGACY_MODELS.has(model) ? 'gemini-3.5-flash' : model
 }
 
-const LEGACY_MODELS = new Set(['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-1.5-pro'])
+const LEGACY_MODELS = new Set(['gemini-3.1-pro', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-1.5-pro'])
 
 export function setGeminiModel(model) {
   write(KEYS.geminiModel, model)
